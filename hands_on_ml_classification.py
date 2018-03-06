@@ -3,6 +3,8 @@ import matplotlib
 from matplotlib import pyplot as plt
 from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.base import clone
 
 
 def main():
@@ -15,8 +17,22 @@ def main():
     y_test_5 = (y_test == 5)
     sgd_clf = SGDClassifier(random_state=42)
     sgd_clf.fit(X_train, y_train_5)
-    print(sgd_clf.predict([some_digit]))
-    show_digit(some_digit)
+    custom_cross_validation(X_train, y_train_5, sgd_clf)
+
+
+def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
+    skfolds = StratifiedKFold(n_splits=n_splits, random_state=random_state)
+    for train_index, test_index in skfolds.split(X, y):
+        clone_clf = clone(clf)
+        X_train_folds = X[train_index]
+        y_train_folds = y[train_index]
+        X_test_fold = X[test_index]
+        y_test_fold = y[test_index]
+
+        clone_clf.fit(X_train_folds, y_train_folds)
+        y_pred = clone_clf.predict(X_test_fold)
+        n_correct = sum(y_pred == y_test_fold)
+        print(n_correct / len(y_pred))
 
 
 def shuffle_data(X, y):
