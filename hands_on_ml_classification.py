@@ -19,20 +19,19 @@ class Never5Classifier(BaseEstimator):
 
 def main():
     mnist = fetch_mldata('MNIST original')
-    X, y = mnist['data'], mnist['target']
-    some_digit = X[36000]
-    X_train, X_test, y_train, y_test = X[:60000], X[60000:], y[:60000], y[60000:]
+    X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
+    some_digit = X_train[36000]
     X_train, y_train = shuffle_data(X_train, y_train)
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
     forest_clf = RandomForestClassifier(random_state=42)
     y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method='predict_proba')
-    print(y_probas_forest)
+    y_scores_forest = y_probas_forest[:, 1]
+    fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5, y_scores_forest)
 
 
 def try_sgd_clf(X_train, y_train_5):
     sgd_clf = SGDClassifier()
-    sgd_clf.fit(X_train, y_train_5)
     y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
     precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
     y_train_pred_90 = (y_scores > 85000)
@@ -106,6 +105,12 @@ def show_digit(digit):
     plt.imshow(digit_image, cmap=matplotlib.cm.binary, interpolation='nearest')
     plt.axis('off')
     plt.show()
+
+
+def split_mnist_sets(mnist):
+    X, y = mnist['data'], mnist['target']
+    X_train, X_test, y_train, y_test = X[:60000], X[60000:], y[:60000], y[60000:]
+    return X_train, X_test, y_train, y_test
 
 
 if __name__ == '__main__':
