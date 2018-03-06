@@ -4,7 +4,16 @@ from matplotlib import pyplot as plt
 from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import cross_val_score
 from sklearn.base import clone
+from sklearn.base import BaseEstimator
+
+
+class Never5Classifier(BaseEstimator):
+    def fit(self, X, y=None):
+        pass
+    def predict(self, X):
+        return np.zeros((len(X), 1), dtype=bool)
 
 
 def main():
@@ -15,9 +24,14 @@ def main():
     X_train, y_train = shuffle_data(X_train, y_train)
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
-    sgd_clf = SGDClassifier(random_state=42)
-    sgd_clf.fit(X_train, y_train_5)
-    custom_cross_validation(X_train, y_train_5, sgd_clf)
+    never_5_clf = SGDClassifier()
+    measure_accuracy_using_cross_validation(X_train, y_train_5, never_5_clf)
+
+
+def measure_accuracy_using_cross_validation(X, y, clf, cv=3, scoring='accuracy'):
+    clf.fit(X, y)
+    cv_score = cross_val_score(clf, X, y, cv=cv, scoring=scoring)
+    print(cv_score)
 
 
 def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
