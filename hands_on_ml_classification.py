@@ -5,7 +5,7 @@ from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
 from sklearn.base import BaseEstimator, clone
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, precision_recall_curve
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, precision_recall_curve, roc_curve
 
 
 class Never5Classifier(BaseEstimator):
@@ -29,6 +29,17 @@ def main():
     precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
     y_train_pred_90 = (y_scores > 85000)
     print_precision_recall_f1(y_train_5, y_train_pred_90)
+    fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
+    plot_roc_curve(tpr, fpr)
+    plt.show()
+
+
+def plot_roc_curve(tpr, fpr, label=None):
+    plt.plot(fpr, tpr, linewidth=2, label=label)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
 
 
 
@@ -36,9 +47,7 @@ def plot_precision_vs_recall(precisions, recalls):
     plt.plot(recalls[:-1], precisions[:-1], 'g-')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
-    plt.xlim([0, 1])
-    plt.ylim([0, 1])
-    plt.show()
+    plt.axis([0, 1, 0, 1])
 
 
 def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
@@ -47,7 +56,6 @@ def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
     plt.xlabel('Threshold')
     plt.legend(loc='upper left')
     plt.ylim([0, 1])
-    plt.show()
 
 
 def print_precision_recall_f1(y_train, y_train_predict):
