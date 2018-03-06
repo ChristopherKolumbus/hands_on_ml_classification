@@ -27,7 +27,9 @@ def main():
     sgd_clf.fit(X_train, y_train_5)
     y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
     precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
-    plot_precision_vs_recall(precisions, recalls)
+    y_train_pred_90 = (y_scores > 85000)
+    print_precision_recall_f1(y_train_5, y_train_pred_90)
+
 
 
 def plot_precision_vs_recall(precisions, recalls):
@@ -48,12 +50,16 @@ def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
     plt.show()
 
 
-def calc_clf_metrics(clf, X_train, y_train, cv=3):
-    y_train_predict = cross_val_predict(clf, X_train, y_train, cv=cv)
-    print(f'Confusion matrix:\n{confusion_matrix(y_train, y_train_predict)}\n'
-          f'Precision: {precision_score(y_train, y_train_predict):6.4f}\n'
+def print_precision_recall_f1(y_train, y_train_predict):
+    print(f'Precision: {precision_score(y_train, y_train_predict):6.4f}\n'
           f'Recall: {recall_score(y_train, y_train_predict):6.4f}\n'
           f'F1: {f1_score(y_train, y_train_predict):6.4f}')
+
+
+def calc_clf_metrics(clf, X_train, y_train, cv=3):
+    y_train_predict = cross_val_predict(clf, X_train, y_train, cv=cv)
+    print(f'Confusion matrix:\n{confusion_matrix(y_train, y_train_predict)}\n')
+    print_precision_recall_f1(y_train, y_train_predict)
 
 
 def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
