@@ -25,17 +25,13 @@ def main():
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
     never_5_clf = SGDClassifier()
-    measure_accuracy_using_cross_validation(X_train, y_train_5, never_5_clf)
-
-
-def measure_accuracy_using_cross_validation(X, y, clf, cv=3, scoring='accuracy'):
-    clf.fit(X, y)
-    cv_score = cross_val_score(clf, X, y, cv=cv, scoring=scoring)
+    cv_score = custom_cross_validation(X, y, never_5_clf)
     print(cv_score)
 
 
 def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
     skfolds = StratifiedKFold(n_splits=n_splits, random_state=random_state)
+    cv_score = []
     for train_index, test_index in skfolds.split(X, y):
         clone_clf = clone(clf)
         X_train_folds = X[train_index]
@@ -46,7 +42,8 @@ def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
         clone_clf.fit(X_train_folds, y_train_folds)
         y_pred = clone_clf.predict(X_test_fold)
         n_correct = sum(y_pred == y_test_fold)
-        print(n_correct / len(y_pred))
+        cv_score.append(n_correct / len(y_pred))
+    return cv_score
 
 
 def shuffle_data(X, y):
