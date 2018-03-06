@@ -3,10 +3,9 @@ import matplotlib
 from matplotlib import pyplot as plt
 from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import cross_val_score
-from sklearn.base import clone
-from sklearn.base import BaseEstimator
+from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
+from sklearn.base import BaseEstimator, clone
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 
 
 class Never5Classifier(BaseEstimator):
@@ -24,9 +23,16 @@ def main():
     X_train, y_train = shuffle_data(X_train, y_train)
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
-    never_5_clf = SGDClassifier()
-    cv_score = custom_cross_validation(X, y, never_5_clf)
-    print(cv_score)
+    sgd_clf = SGDClassifier()
+    calc_clf_metrics(sgd_clf, X_train, y_train_5)
+
+
+def calc_clf_metrics(clf, X_train, y_train, cv=3):
+    y_train_predict = cross_val_predict(clf, X_train, y_train, cv=cv)
+    print(f'Confusion matrix:\n{confusion_matrix(y_train, y_train_predict)}\n'
+          f'Precision: {precision_score(y_train, y_train_predict):6.4f}\n'
+          f'Recall: {recall_score(y_train, y_train_predict):6.4f}\n'
+          f'F1: {f1_score(y_train, y_train_predict):6.4f}')
 
 
 def custom_cross_validation(X, y, clf, n_splits=3, random_state=42):
