@@ -5,7 +5,9 @@ from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
 from sklearn.base import BaseEstimator, clone
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, precision_recall_curve, roc_curve
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
+from sklearn.metrics import precision_recall_curve, roc_curve, roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 
 
 class Never5Classifier(BaseEstimator):
@@ -23,6 +25,12 @@ def main():
     X_train, y_train = shuffle_data(X_train, y_train)
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
+    forest_clf = RandomForestClassifier(random_state=42)
+    y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method='predict_proba')
+    print(y_probas_forest)
+
+
+def try_sgd_clf(X_train, y_train_5):
     sgd_clf = SGDClassifier()
     sgd_clf.fit(X_train, y_train_5)
     y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
@@ -30,8 +38,7 @@ def main():
     y_train_pred_90 = (y_scores > 85000)
     print_precision_recall_f1(y_train_5, y_train_pred_90)
     fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
-    plot_roc_curve(tpr, fpr)
-    plt.show()
+    roc_auc = roc_auc_score(y_train_5, y_scores)
 
 
 def plot_roc_curve(tpr, fpr, label=None):
