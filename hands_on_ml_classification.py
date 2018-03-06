@@ -22,22 +22,36 @@ def main():
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     some_digit = X_train[36000]
     X_train, y_train = shuffle_data(X_train, y_train)
+    try_binary_clf(X_train, y_train)
+
+
+def try_binary_clf(X_train, y_train):
     y_train_5 = (y_train == 5)
-    y_test_5 = (y_test == 5)
+    fpr_sgd, tpr_sgd, thresholds_sgd = try_sgd_clf(X_train, y_train_5)
+    fpr_forest, tpr_forest, thresholds_forest, y_scores_forest, y_pred_forest = try_forest_clf(X_train, y_train_5)
+    plt.plot(fpr_sgd, tpr_sgd, 'b', label='SGD')
+    plot_roc_curve(tpr_forest, fpr_forest, 'Random Forest')
+    plt.legend(loc='lower right')
+    plt.show()
+    roc_auc = roc_auc_score(y_train_5, y_scores_forest)
+    print(roc_auc)
+    print_precision_recall_f1(y_train_5, y_pred_forest)
+
+
+def try_forest_clf(X_train, y_train_5):
     forest_clf = RandomForestClassifier(random_state=42)
-    y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method='predict_proba')
-    y_scores_forest = y_probas_forest[:, 1]
-    fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5, y_scores_forest)
+    y_probas = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method='predict_proba')
+    y_pred = cross_val_predict(forest_clf, X_train, y_train_5, cv=3)
+    y_scores = y_probas[:, 1]
+    fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
+    return fpr, tpr, thresholds, y_scores, y_pred
 
 
 def try_sgd_clf(X_train, y_train_5):
     sgd_clf = SGDClassifier()
     y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
-    precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
-    y_train_pred_90 = (y_scores > 85000)
-    print_precision_recall_f1(y_train_5, y_train_pred_90)
     fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
-    roc_auc = roc_auc_score(y_train_5, y_scores)
+    return fpr, tpr, thresholds
 
 
 def plot_roc_curve(tpr, fpr, label=None):
