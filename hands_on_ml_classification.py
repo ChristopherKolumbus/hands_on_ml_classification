@@ -5,7 +5,7 @@ from sklearn.datasets import fetch_mldata
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
 from sklearn.base import BaseEstimator, clone
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, precision_recall_curve
 
 
 class Never5Classifier(BaseEstimator):
@@ -24,7 +24,19 @@ def main():
     y_train_5 = (y_train == 5)
     y_test_5 = (y_test == 5)
     sgd_clf = SGDClassifier()
-    calc_clf_metrics(sgd_clf, X_train, y_train_5)
+    sgd_clf.fit(X_train, y_train_5)
+    y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
+    precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
+    plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
+
+
+def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
+    plt.plot(thresholds, precisions[:-1], 'b--', label='Precision')
+    plt.plot(thresholds, recalls[:-1], 'g-', label='Recall')
+    plt.xlabel('Threshold')
+    plt.legend(loc='upper left')
+    plt.ylim([0, 1])
+    plt.show()
 
 
 def calc_clf_metrics(clf, X_train, y_train, cv=3):
