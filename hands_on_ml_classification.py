@@ -27,7 +27,16 @@ def main():
     sgd_clf.fit(X_train, y_train_5)
     y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
     precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
-    plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
+    plot_precision_vs_recall(precisions, recalls)
+
+
+def plot_precision_vs_recall(precisions, recalls):
+    plt.plot(recalls[:-1], precisions[:-1], 'g-')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.show()
 
 
 def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
