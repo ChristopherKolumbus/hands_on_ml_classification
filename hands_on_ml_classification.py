@@ -8,6 +8,9 @@ from sklearn.base import BaseEstimator, clone
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 from sklearn.metrics import precision_recall_curve, roc_curve, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.multiclass import OneVsOneClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
 
 
 class Never5Classifier(BaseEstimator):
@@ -22,7 +25,39 @@ def main():
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     some_digit = X_train[36000]
     X_train, y_train = shuffle_data(X_train, y_train)
-    try_binary_clf(X_train, y_train)
+    y_train_large = (y_train >= 7)
+    y_train_odd = (y_train % 2 == 1)
+    y_multilabel = np.c_[y_train_large, y_train_odd]
+    knn_clf = KNeighborsClassifier()
+    y_train_knn_pred = cross_val_predict(knn_clf, X_train, y_train, cv=3)
+    print(f1_score(y_train, y_train_knn_pred, average='macro'))
+
+
+def multiclass_sgd(X_train, y_train):
+    sgd_clf = SGDClassifier()
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
+    y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
+    conf_mx = confusion_matrix(y_train, y_train_pred)
+    row_sums = conf_mx.sum(axis=1, keepdims=True)
+    norm_conf_mx = conf_mx / row_sums
+    np.fill_diagonal(norm_conf_mx, 0)
+    plt.matshow(norm_conf_mx, cmap=plt.cm.gray)
+    plt.show()
+
+
+def multiclass_ovo_sgd(X_train, y_train, some_digit):
+    ovo_clf = OneVsOneClassifier(SGDClassifier(random_state=42))
+    ovo_clf.fit(X_train, y_train)
+    print(ovo_clf.predict([some_digit]))
+    print(len(ovo_clf.estimators_))
+
+
+def multiclass_forest(X_train, y_train, some_digit):
+    forest_clf = RandomForestClassifier(random_state=42)
+    forest_clf.fit(X_train, y_train)
+    print(forest_clf.predict([some_digit]))
+    print(forest_clf.predict_proba([some_digit]))
 
 
 def try_binary_clf(X_train, y_train):
