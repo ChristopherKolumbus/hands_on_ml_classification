@@ -23,14 +23,28 @@ class Never5Classifier(BaseEstimator):
 def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
-    some_digit = X_train[36000]
-    X_train, y_train = shuffle_data(X_train, y_train)
-    y_train_large = (y_train >= 7)
-    y_train_odd = (y_train % 2 == 1)
-    y_multilabel = np.c_[y_train_large, y_train_odd]
+    some_index = 500
+    some_digit = X_train[some_index]
+    some_digit_test = X_test[some_index]
+    noisy_digit, clean_digit = multioutput_classification(X_train, X_test, some_index)
+    show_digit(some_digit_test)
+    show_digit(noisy_digit)
+    show_digit(clean_digit)
+
+
+def multioutput_classification(X_train, X_test, some_index):
+    noise = np.random.randint(0, 100, (len(X_train), 784))
+    X_train_mod = X_train + noise
+    noise = np.random.randint(0, 100, (len(X_test), 784))
+    X_test_mod = X_test + noise
+    y_train_mod = X_train
+    y_test_mod = X_test
     knn_clf = KNeighborsClassifier()
-    y_train_knn_pred = cross_val_predict(knn_clf, X_train, y_train, cv=3)
-    print(f1_score(y_train, y_train_knn_pred, average='macro'))
+    knn_clf.fit(X_train_mod, y_train_mod)
+    noisy_digit = X_test_mod[some_index]
+    clean_digit = knn_clf.predict([noisy_digit])
+    return noisy_digit ,clean_digit
+
 
 
 def multiclass_sgd(X_train, y_train):
