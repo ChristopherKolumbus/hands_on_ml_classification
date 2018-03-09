@@ -3,9 +3,7 @@ import os
 import numpy as np
 from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
 
 
@@ -31,9 +29,15 @@ def main():
     X_train, y_train = shuffle_training_data(X_train, y_train)
     X_train_part, y_train_part = X_train[:1000], y_train[:1000]
     knn_clf = KNeighborsClassifier()
-    knn_clf.fit(X_train_part, y_train_part)
+    parameters = {'n_neighbors': [5, 6, 7, 8], 'weights': ['distance']}
+    grid_search = GridSearchCV(knn_clf, parameters, cv=3, scoring='accuracy', n_jobs=-1, verbose=2)
+    grid_search.fit(X_train.astype(np.float64), y_train)
+    best_estimator = grid_search.best_estimator_
+    cv_results = grid_search.cv_results_
+    for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
+        print(mean_score, params)
     model_handler = ModelHandler(r'.\models')
-    model_handler.save(knn_clf, 'knn_clf')
+    model_handler.save(best_estimator, 'knn_clf')
 
 
 
