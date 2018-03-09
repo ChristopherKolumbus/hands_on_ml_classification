@@ -29,9 +29,12 @@ def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
+    X_train_part, y_train_part = X_train[:1000], y_train[:1000]
     knn_clf = KNeighborsClassifier()
-    #cv_score = cross_val_score(knn_clf, X_train, y_train, cv=3, scoring='accuracy', n_jobs=-1)
-    #print(cv_score)
+    knn_clf.fit(X_train_part, y_train_part)
+    model_handler = ModelHandler(r'.\models')
+    model_handler.save(knn_clf, 'knn_clf')
+
 
 
 def split_mnist_sets(mnist):
