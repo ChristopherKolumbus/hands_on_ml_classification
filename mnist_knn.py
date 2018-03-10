@@ -33,6 +33,14 @@ def main():
     X_train, y_train = shuffle_training_data(X_train, y_train)
     some_digit = X_train[40000]
     show_digit(some_digit)
+    some_digit_shifted = shift_digit(some_digit, (10, 0))
+    show_digit(some_digit_shifted)
+
+
+def shift_digit(digit, amount):
+    digit_image = reshape_digit(digit, mode='to_img')
+    digit_image_shifted = shift(digit_image, amount)
+    return reshape_digit(digit_image_shifted, mode='to_vector')
 
 
 def show_digit(digit):
