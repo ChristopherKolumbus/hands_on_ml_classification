@@ -50,9 +50,7 @@ def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
-    some_digit = X_train[40000]
     X_train_aug, y_train_aug = data_augmentation(X_train, y_train, [(-1, 0), (1, 0), (0, -1), (0, 1)])
-    print(X_train_aug)
 
 
 def data_augmentation(X_train, y_train, shifts):
@@ -62,8 +60,10 @@ def data_augmentation(X_train, y_train, shifts):
         for shift in shifts:
             digits_shifted.append(shift_digit(digit, shift))
             new_labels.append(label)
-    X_train_aug = np.concatenate((X_train, np.array(digits_shifted)), axis=0)
-    y_train_aug = np.concatenate((y_train, np.array(new_labels)), axis=0)
+    digits_shifted, new_labels = np.array(digits_shifted), np.array(new_labels)
+    digits_shifted, new_labels = shuffle_training_data(digits_shifted, new_labels)
+    X_train_aug = np.concatenate((X_train, digits_shifted), axis=0)
+    y_train_aug = np.concatenate((y_train, new_labels), axis=0)
     return X_train_aug, y_train_aug
 
 
