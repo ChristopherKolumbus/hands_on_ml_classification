@@ -28,6 +28,9 @@ def main():
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
     X_train_part, y_train_part = X_train[:1000], y_train[:1000]
+
+
+def grid_search_model(X_train, y_train):
     knn_clf = KNeighborsClassifier()
     parameters = {'n_neighbors': [5, 6, 7, 8], 'weights': ['distance']}
     grid_search = GridSearchCV(knn_clf, parameters, cv=3, scoring='accuracy', n_jobs=-1, verbose=2)
