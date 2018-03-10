@@ -8,8 +8,6 @@ from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
-from sklearn.base import TransformerMixin, BaseEstimator
-
 
 
 class ModelHandler:
@@ -33,14 +31,18 @@ def main():
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
     X_train_aug, y_train_aug = data_augmentation(X_train, y_train, [(-1, 0), (1, 0), (0, -1), (0, 1)])
+    knn_clf_aug = KNeighborsClassifier(n_neighbors=6, weights='distance', n_jobs=-1)
+    knn_clf_aug.fit(X_train_aug, y_train_aug)
+    model_handler = ModelHandler(r'.\models')
+    model_handler.save(knn_clf_aug, 'knn_clf_aug')
 
 
-def data_augmentation(X_train, y_train, shifts):
+def data_augmentation(X_train, y_train, image_shifts):
     digits_shifted = []
     new_labels = []
     for digit, label in zip(X_train, y_train):
-        for shift in shifts:
-            digits_shifted.append(shift_digit(digit, shift))
+        for image_shift in image_shifts:
+            digits_shifted.append(shift_digit(digit, image_shift))
             new_labels.append(label)
     digits_shifted, new_labels = np.array(digits_shifted), np.array(new_labels)
     digits_shifted, new_labels = shuffle_training_data(digits_shifted, new_labels)
@@ -80,7 +82,6 @@ def grid_search_model(X_train, y_train):
         print(mean_score, params)
     model_handler = ModelHandler(r'.\models')
     model_handler.save(best_estimator, 'knn_clf')
-
 
 
 def split_mnist_sets(mnist):
