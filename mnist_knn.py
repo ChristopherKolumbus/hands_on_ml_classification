@@ -35,10 +35,14 @@ def main():
 
 
 def show_digit(digit):
-    digit_image = digit.reshape(28, 28)
+    digit_image = reshape_digit(digit)
     plt.imshow(digit_image, cmap=matplotlib.cm.binary, interpolation='nearest')
     plt.axis('off')
     plt.show()
+
+    
+def reshape_digit(digit):
+    return digit.reshape(28, 28)
 
 
 def grid_search_model(X_train, y_train):
