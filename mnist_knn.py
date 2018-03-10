@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
+from scipy.ndimage import shift
 from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
@@ -35,14 +36,17 @@ def main():
 
 
 def show_digit(digit):
-    digit_image = reshape_digit(digit)
+    digit_image = reshape_digit(digit, mode='to_img')
     plt.imshow(digit_image, cmap=matplotlib.cm.binary, interpolation='nearest')
     plt.axis('off')
     plt.show()
 
-    
-def reshape_digit(digit):
-    return digit.reshape(28, 28)
+
+def reshape_digit(digit, mode):
+    if mode == 'to_img':
+        return digit.reshape(28, 28)
+    elif mode == 'to_vector':
+        return digit.reshape(digit.size)
 
 
 def grid_search_model(X_train, y_train):
