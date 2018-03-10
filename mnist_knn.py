@@ -8,6 +8,7 @@ from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
+from sklearn.base import TransformerMixin, BaseEstimator
 
 
 
@@ -27,14 +28,44 @@ class ModelHandler:
         os.remove(os.path.join(self.models_dir, filename))
 
 
+class DataAugmenter(TransformerMixin, BaseEstimator):
+    def __init__(self, shifts):
+        self.shifts = shifts
+        self.digits_shifted = []
+
+    def fit(self, X, y=None):
+        self.new_labels = y
+        return self
+
+    def transform(self, X):
+        for digit in X:
+            for shift in self.shifts:
+                self.digits_shifted.append(shift_digit(digit, shift))
+        np.concatenate((X, np.array(self.digits_shifted)), axis=0), np.concatenate()
+        return np.array(self.digits_shifted), np.array(self.new_labels)
+
+
+
 def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
     some_digit = X_train[40000]
-    show_digit(some_digit)
-    some_digit_shifted = shift_digit(some_digit, (10, 0))
-    show_digit(some_digit_shifted)
+    X_train_aug, y_train_aug = data_augmentation(X_train, y_train, [(-1, 0), (1, 0), (0, -1), (0, 1)])
+    print(X_train_aug)
+
+
+def data_augmentation(X_train, y_train, shifts):
+    digits_shifted = []
+    new_labels = []
+    for digit, label in zip(X_train, y_train):
+        for shift in shifts:
+            digits_shifted.append(shift_digit(digit, shift))
+            new_labels.append(label)
+    X_train_aug = np.concatenate((X_train, np.array(digits_shifted)), axis=0)
+    y_train_aug = np.concatenate((y_train, np.array(new_labels)), axis=0)
+    return X_train_aug, y_train_aug
+
 
 
 def shift_digit(digit, amount):
