@@ -1,10 +1,13 @@
 import os
 
 import numpy as np
+import matplotlib
+from matplotlib import pyplot as plt
 from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
+
 
 
 class ModelHandler:
@@ -27,7 +30,15 @@ def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
-    X_train_part, y_train_part = X_train[:1000], y_train[:1000]
+    some_digit = X_train[40000]
+    show_digit(some_digit)
+
+
+def show_digit(digit):
+    digit_image = digit.reshape(28, 28)
+    plt.imshow(digit_image, cmap=matplotlib.cm.binary, interpolation='nearest')
+    plt.axis('off')
+    plt.show()
 
 
 def grid_search_model(X_train, y_train):
