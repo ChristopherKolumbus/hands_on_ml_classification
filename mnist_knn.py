@@ -67,7 +67,6 @@ def data_augmentation(X_train, y_train, shifts):
     return X_train_aug, y_train_aug
 
 
-
 def shift_digit(digit, amount):
     digit_image = reshape_digit(digit, mode='to_img')
     digit_image_shifted = shift(digit_image, amount)
