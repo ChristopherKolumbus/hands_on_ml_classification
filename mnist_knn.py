@@ -28,24 +28,6 @@ class ModelHandler:
         os.remove(os.path.join(self.models_dir, filename))
 
 
-class DataAugmenter(TransformerMixin, BaseEstimator):
-    def __init__(self, shifts):
-        self.shifts = shifts
-        self.digits_shifted = []
-
-    def fit(self, X, y=None):
-        self.new_labels = y
-        return self
-
-    def transform(self, X):
-        for digit in X:
-            for shift in self.shifts:
-                self.digits_shifted.append(shift_digit(digit, shift))
-        np.concatenate((X, np.array(self.digits_shifted)), axis=0), np.concatenate()
-        return np.array(self.digits_shifted), np.array(self.new_labels)
-
-
-
 def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
