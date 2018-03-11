@@ -8,6 +8,7 @@ from sklearn.datasets import fetch_mldata
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals import joblib
+from sklearn.metrics import accuracy_score
 
 
 class ModelHandler:
@@ -35,6 +36,11 @@ def main():
     knn_clf_aug.fit(X_train_aug, y_train_aug)
     model_handler = ModelHandler(r'.\models')
     model_handler.save(knn_clf_aug, 'knn_clf_aug')
+
+
+def eval_model_test_set(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    print(accuracy_score(y_test, y_pred))
 
 
 def data_augmentation(X_train, y_train, image_shifts):
