@@ -31,11 +31,15 @@ def main():
     mnist = fetch_mldata('MNIST original')
     X_train, X_test, y_train, y_test = split_mnist_sets(mnist)
     X_train, y_train = shuffle_training_data(X_train, y_train)
-    X_train_aug, y_train_aug = data_augmentation(X_train, y_train, [(-1, 0), (1, 0), (0, -1), (0, 1)])
     knn_clf_aug = KNeighborsClassifier(n_neighbors=6, weights='distance', n_jobs=-1)
-    knn_clf_aug.fit(X_train_aug, y_train_aug)
-    model_handler = ModelHandler(r'.\models')
-    model_handler.save(knn_clf_aug, 'knn_clf_aug')
+
+
+def train_model_augmented_training_set(model, X_train, y_train, directory, filename):
+    X_train_aug, y_train_aug = data_augmentation(X_train, y_train, [(-1, 0), (1, 0), (0, -1), (0, 1)])
+    model.fit(X_train_aug, y_train_aug)
+    model_handler = ModelHandler(directory)
+    model_handler.save(model, filename)
+    return model
 
 
 def eval_model_test_set(model, X_test, y_test):
